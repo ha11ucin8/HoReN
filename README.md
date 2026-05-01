@@ -327,7 +327,7 @@ If you use this code, please cite:
   title  = {HoReN: Normalized Hopfield Retrieval for Large-Scale Sequential Model Editing},
   author = {Fang, Yuan and Xie, Yi and Ran, Xuming},
   year   = {2026},
-  note   = {Code: \url{https://github.com/ha11ucin8/horen-paper}}
+  note   = {Code: \url{https://github.com/ha11ucin8/HoReN}}
 }
 ```
 
