@@ -3,6 +3,10 @@ hugging_cache/
 # user defined
 local
 data/*
+!data/ZsRE/
+data/ZsRE/*
+!data/ZsRE/zsre_edit_data.json
+!data/ZsRE/zsre_train_data.json
 # Python
 __pycache__/
 *.py[cod]
@@ -42,5 +46,5 @@ data/stats/
 # OS
 .DS_Store
 Thumbs.db
-zsre_edit_data.json
-zsre_train_data.json
+# zsre_edit_data.json
+# zsre_train_data.json
