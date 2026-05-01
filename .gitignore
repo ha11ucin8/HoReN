@@ -1,0 +1,46 @@
+hugging_cache/
+
+# user defined
+local
+data/*
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Null-space projection matrices (large binary files, regenerated automatically)
+null_space_project*.pt
+
+# MEND trained model checkpoints
+results/models/
+
+# Experiment outputs (too large for version control)
+outputs/*
+logs/*
+
+# Hugging Face model cache
+hugging_cache/*
+
+# Data
+data/stats/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+zsre_edit_data.json
+zsre_train_data.json

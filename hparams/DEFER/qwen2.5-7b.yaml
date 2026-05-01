@@ -1,0 +1,10 @@
+alg_name: "DEFER"
+model_name: "./hugging_cache/qwen2.5-7b-instruct"
+device: 0
+
+inner_params:
+- model.layers[24].mlp.down_proj.weight
+
+edit_lr: 7e-5
+n_iter: 100
+threshold: 0.5

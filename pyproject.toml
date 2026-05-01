@@ -1,0 +1,11 @@
+[tool.black]
+line-length = 120
+exclude = '''
+/(
+    \.git
+  | __pycache__
+  | \.venv
+  | venv
+  | src/models/melo/peft_egg
+)/
+'''

@@ -1,0 +1,39 @@
+alg_name: "ULTRAEDIT"
+device: 0
+
+model_name: "./hugging_cache/deepseek-r1-distill-qwen-1.5b"
+model_class: AutoModelForCausalLM
+tokenizer_class: AutoTokenizer
+tokenizer_name: "./hugging_cache/deepseek-r1-distill-qwen-1.5b"
+
+# Layers for ZsRE / WikiBigEdit (28-layer Qwen-based DeepSeek-R1-Distill 1.5B)
+inner_params:
+- model.layers.16.mlp.gate_proj
+- model.layers.17.mlp.gate_proj
+- model.layers.18.mlp.gate_proj
+- model.layers.19.mlp.gate_proj
+- model.layers.20.mlp.gate_proj
+- model.layers.16.mlp.up_proj
+- model.layers.17.mlp.up_proj
+- model.layers.18.mlp.up_proj
+- model.layers.19.mlp.up_proj
+- model.layers.20.mlp.up_proj
+
+alg: UltraEdit
+dropout: 0.0
+no_grad_layers: null
+
+lr: 1e-6
+token: mask
+
+# Set batch_size: 1 / batch_size_once: 1 for sequential (one-edit-at-a-time) use.
+batch_size: 1
+batch_size_once: 1
+editor_batch_size: 1024
+silent: False
+half: true
+bf16: true
+
+model_parallel: false
+
+results_dir: ./results

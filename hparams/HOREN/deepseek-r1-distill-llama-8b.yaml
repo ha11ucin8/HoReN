@@ -1,0 +1,34 @@
+alg_name: "HOREN"
+model_name: "./hugging_cache/deepseek-r1-distill-llama-8b"
+device: 0
+
+inner_params:
+- model.layers[29].mlp.down_proj.weight
+
+n_iter: 50
+edit_lr: 1.0
+lora_edit_lr: 0.001
+
+name: Hopfield
+adapter_mode: value
+val_init: cold
+replacement: replace_last
+eps: 1.0
+dist_fn: euc
+eps_expand: variance
+num_pert: 8
+normalize_codebook_keys: true
+query_selection_strategy: last_60_perc_prompt_tokens_avg
+
+hopfield_retrieval_alpha: 0.1
+hopfield_retrieval_beta: 20.0
+hopfield_retrieval_eps: 1e-5
+hopfield_retrieval_max_iter: 1
+hopfield_key_match_threshold: 0.80
+
+lora_rank: 4
+lora_scale: 1.0
+bf16: true
+
+batch_size: 1
+max_length: 512
