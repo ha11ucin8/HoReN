@@ -1,0 +1,47 @@
+alg_name: "ULTRAEDIT"
+device: 0
+
+model_name: "/hy-tmp/models/Qwen3-1.7B"
+model_class: AutoModelForCausalLM
+tokenizer_class: AutoTokenizer
+tokenizer_name: "/hy-tmp/models/Qwen3-1.7B"
+
+# Qwen3-1.7B Group A UltraEdit setting from prior Qwen3 ZsRE sweep.
+inner_params:
+- model.layers.18.mlp.gate_proj
+- model.layers.19.mlp.gate_proj
+- model.layers.20.mlp.gate_proj
+- model.layers.21.mlp.gate_proj
+- model.layers.22.mlp.gate_proj
+- model.layers.23.mlp.gate_proj
+- model.layers.24.mlp.gate_proj
+- model.layers.25.mlp.gate_proj
+- model.layers.26.mlp.gate_proj
+- model.layers.18.mlp.up_proj
+- model.layers.19.mlp.up_proj
+- model.layers.20.mlp.up_proj
+- model.layers.21.mlp.up_proj
+- model.layers.22.mlp.up_proj
+- model.layers.23.mlp.up_proj
+- model.layers.24.mlp.up_proj
+- model.layers.25.mlp.up_proj
+- model.layers.26.mlp.up_proj
+
+alg: UltraEdit
+dropout: 0.0
+no_grad_layers: null
+
+lr: 1e-6
+token: mask
+
+batch_size: 5
+batch_size_once: 5
+editor_batch_size: 1024
+silent: False
+half: true
+bf16: true
+
+model_parallel: false
+max_length: 128
+
+results_dir: ./results

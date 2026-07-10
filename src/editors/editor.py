@@ -137,7 +137,7 @@ class BaseEditor:
                 self.model = AutoModel.from_pretrained(self.model_name, trust_remote_code=True, **model_kwargs)
                 self.tok = AutoTokenizer.from_pretrained(self.model_name, trust_remote_code=True)
                 self.tok.pad_token_id = self.tok.eos_token_id
-            elif "qwen2" in self.model_name.lower():
+            elif "qwen2" in self.model_name.lower() or "qwen3" in self.model_name.lower():
                 self.model = AutoModelForCausalLM.from_pretrained(
                     self.model_name,
                     trust_remote_code=True,
@@ -432,7 +432,7 @@ class BaseEditor:
         """
         exp_start = time()
         eval_metric = kwargs["eval_metric"] if "eval_metric" in kwargs.keys() else "exact match"
-        if hasattr(self.hparams, "batch_size"):  # For Singleton Editing, bs=1
+        if hasattr(self.hparams, "batch_size") and not BatchEditor.is_batchable_method(self.alg_name):  # For Singleton Editing, bs=1
             assert self.hparams.batch_size == 1, "Single Editing: batch_size should be set to 1"
         all_metrics = []
         if "pre_edit" in kwargs and kwargs["pre_edit"] is not None:
@@ -472,14 +472,17 @@ class BaseEditor:
                 json.dump(all_metrics, open(kwargs["pre_file"], "w"), indent=4)
 
         def edit_func(request):
+            request_batch = request if isinstance(request, list) else [request]
             if self.alg_name == "IKE" or self.alg_name == "ICE":
+                if len(request_batch) != 1:
+                    raise ValueError(f"{self.alg_name} only supports single-request editing in this path.")
                 edited_model, weights_copy, icl_examples = (
                     self.model,
                     {},
                     self.apply_algo(
                         self.model,
                         self.tok,
-                        [request],
+                        request_batch,
                         self.hparams,
                         copy=False,
                         return_orig_weights=True,
@@ -491,7 +494,7 @@ class BaseEditor:
                 edited_model, weights_copy = self.apply_algo(
                     self.model,
                     self.tok,
-                    [request],
+                    request_batch,
                     self.hparams,
                     copy=False,
                     return_orig_weights=True,
@@ -606,7 +609,7 @@ class BaseEditor:
         if total_ds_size <= 1000:
             custom_metric_periods = [1, 10, 30, 120, 100, 500]
         elif total_ds_size <= 10000:
-            custom_metric_periods = [5000]
+            custom_metric_periods = [500, 5000]
         else:
             custom_metric_periods = []
 
@@ -618,16 +621,20 @@ class BaseEditor:
             metric_period = 5000
         if sequential_edit:
             tot_edit = 0
-            for i, request in enumerate(tqdm(requests, total=len(requests))):
+            batch_size = max(1, int(getattr(self.hparams, "batch_size", 1)))
+            total_batches = (len(requests) + batch_size - 1) // batch_size
+            for batch_start in tqdm(range(0, len(requests), batch_size), total=total_batches):
+                request_batch = requests[batch_start : batch_start + batch_size]
                 reset_edit_timer()
-                edited_model, weights_copy, icl_examples = edit_func(request)
+                edited_model, weights_copy, icl_examples = edit_func(request_batch)
                 tot_edit += get_edit_time()
+                edited_count = batch_start + len(request_batch)
 
-                if (i + 1) in custom_metric_periods or (i + 1) % metric_period == 0:
-                    all_metrics_phase = copy.deepcopy(all_metrics[: i + 1])
+                if edited_count in custom_metric_periods or edited_count % metric_period == 0:
+                    all_metrics_phase = copy.deepcopy(all_metrics[:edited_count])
                     inference_start = time()
                     checkpoint_generate_calls = 0
-                    for j, request in enumerate(tqdm(requests[: i + 1], total=len(requests[: i + 1]))):
+                    for j, request in enumerate(tqdm(requests[:edited_count], total=len(requests[:edited_count]))):
                         gen_calls = edit_evaluation(
                             all_metrics_phase, request, edited_model, j, test_generation, icl_examples, **kwargs
                         )
@@ -639,7 +646,7 @@ class BaseEditor:
                     num_of_editor_params = count_editor_params(weights_copy, edited_model)
                     summary_metrics_(
                         all_metrics_phase,
-                        ds_size=i + 1,
+                        ds_size=edited_count,
                         start_time=exp_start,
                         total_edit_time=tot_edit,
                         total_inference_time=checkpoint_inference_time,

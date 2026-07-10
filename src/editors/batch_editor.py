@@ -16,6 +16,7 @@ class BatchEditor(Enum):
     ALPHAEDIT = "AlphaEdit"
     ULTRAEDIT = "ULTRAEDIT"
     CORE = "CORE"
+    WISE = "WISE"
 
     @staticmethod
     def is_batchable_method(alg_name: str):
@@ -34,4 +35,5 @@ class BatchEditor(Enum):
             or alg_name == BatchEditor.EMMET.value
             or alg_name == BatchEditor.ALPHAEDIT.value
             or alg_name == BatchEditor.CORE.value
+            or alg_name == BatchEditor.WISE.value
         )

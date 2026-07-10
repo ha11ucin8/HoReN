@@ -114,7 +114,7 @@ def compute_edit_quality(
                 )
             )
     if test_generation:
-        if hparams.alg_name in ("GRACE", "HOREN"):
+        if hparams.alg_name in ("GRACE", "HOREN") or getattr(hparams, "no_teacher_forcing", False):
             ret["fluency"] = test_generation_quality(
                 model=model,
                 tok=tok,
@@ -179,6 +179,11 @@ def compute_rewrite_or_rephrase_quality(
         elif eval_metric == "ood_ppl":
             ans = OOD_PPL(model, tok, prompt, target_new, device)
             ret = {f"ood_acc": ans}
+        elif getattr(hparams, "no_teacher_forcing", False):
+            if "t5" in model_name.lower():
+                raise ValueError("no_teacher_forcing evaluation is only implemented for decoder-only models.")
+            acc = test_prediction_acc(model, tok, hparams, prompt, target_new, device, vanilla_generation=True)
+            ret = {f"{key}_acc": acc}
         elif hparams.alg_name in ("GRACE", "HOREN"):
             # ppl = PPL(model, tok, prompt, target_new, device)
             if "t5" in model_name.lower():
@@ -230,7 +235,7 @@ def compute_locality_quality(
                 locality_ground_truth,
                 device,
                 locality=True,
-                vanilla_generation=hparams.alg_name in ("GRACE", "HOREN"),
+                vanilla_generation=hparams.alg_name in ("GRACE", "HOREN") or getattr(hparams, "no_teacher_forcing", False),
             )
         if type(loc_tokens) is not list:
             loc_tokens = [

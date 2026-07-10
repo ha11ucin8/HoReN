@@ -19,6 +19,7 @@ def apply_wise_to_model(
     if copy:
         model = deepcopy(model)
     device = f"cuda:{hparams.device}"
+    setattr(model.config, "batch_size", hparams.batch_size)
     context_templates = get_context_templates(model, tok, length_params=[[5, 5], [10, 5]], device=device)
     editor = WISE(model=model, config=hparams, device=device)
     import os

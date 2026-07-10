@@ -94,9 +94,15 @@ def tokenize(batch, tokenizer, device, context_templates=None, hparams=None):
 
     mask_token = -100  # ignore_index of CrossEntropyLoss
     if hasattr(hparams, "use_chat_template") and hparams.use_chat_template:
+        chat_template_kwargs = {}
+        if hasattr(hparams, "model_name") and "qwen3" in hparams.model_name.lower():
+            chat_template_kwargs["enable_thinking"] = False
         full_prompt = [
             tokenizer.apply_chat_template(
-                [{"role": "user", "content": templ.format(p)}], add_generation_prompt=True, tokenize=False
+                [{"role": "user", "content": templ.format(p)}],
+                add_generation_prompt=True,
+                tokenize=False,
+                **chat_template_kwargs,
             )
             + " "
             + l
@@ -106,7 +112,10 @@ def tokenize(batch, tokenizer, device, context_templates=None, hparams=None):
         prompt_ids = tokenizer(
             [
                 tokenizer.apply_chat_template(
-                    [{"role": "user", "content": templ.format(p)}], add_generation_prompt=True, tokenize=False
+                    [{"role": "user", "content": templ.format(p)}],
+                    add_generation_prompt=True,
+                    tokenize=False,
+                    **chat_template_kwargs,
                 )
                 for templ in context_templates
                 for p in prompts

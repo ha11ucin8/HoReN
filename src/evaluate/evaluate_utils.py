@@ -304,7 +304,15 @@ def test_prediction_acc(model, tok, hparams, prompts, targets, device, locality=
         ]
     if not locality and hasattr(hparams, "use_chat_template") and hparams.use_chat_template:
         prompts = [[{"role": "user", "content": m}] for m in prompts]
-        prompts = tok.apply_chat_template(prompts, add_generation_prompt=True, tokenize=False)
+        chat_template_kwargs = {}
+        if hasattr(hparams, "model_name") and "qwen3" in hparams.model_name.lower():
+            chat_template_kwargs["enable_thinking"] = False
+        prompts = tok.apply_chat_template(
+            prompts,
+            add_generation_prompt=True,
+            tokenize=False,
+            **chat_template_kwargs,
+        )
     prompt_target = [prompt + " " + target for prompt, target in zip(prompts, targets)]
     max_prompt_len = max([len(tok.encode(_)) for _ in prompt_target]) + 1
     before_padding_side = tok.padding_side

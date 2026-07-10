@@ -147,6 +147,11 @@ def main():
     parser.add_argument("--ds_size", default=100, type=int)
     parser.add_argument("--sequential_edit", action="store_true")
     parser.add_argument(
+        "--no_teacher_forcing",
+        action="store_true",
+        help="Evaluate rewrite/rephrase/locality with autoregressive generation instead of teacher forcing.",
+    )
+    parser.add_argument(
         "--bf16",
         action="store_true",
         help="Load the model in bfloat16. Overrides the bf16 setting in the hparams YAML.",
@@ -187,6 +192,7 @@ def main():
     hparams = editing_hparams.from_hparams(args.hparams_dir)
     if args.bf16:
         hparams.bf16 = True
+    hparams.no_teacher_forcing = args.no_teacher_forcing
 
     # Apply HOREN-specific CLI overrides
     if args.editing_method == "HOREN":
@@ -215,6 +221,8 @@ def main():
     )
 
     print(f"Results will be saved to: {output_file}")
+    if args.no_teacher_forcing:
+        print("Evaluation mode: autoregressive generation (no teacher forcing)")
 
     editor = BaseEditor.from_hparams(hparams)
 
